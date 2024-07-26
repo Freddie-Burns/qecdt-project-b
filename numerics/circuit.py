@@ -16,7 +16,7 @@ def main():
     df = gen_prob_dataframe()
 
     for theta in np.linspace(0, np.pi/2, 65):
-        cir.set_theta(theta)                    # set new theta which generates new psi
+        cir.settheta(theta)                    # set new theta which generates new psi
         prob_distr = cir.prob_distribution()    # probability of each outcome
 
         # update dataframe
@@ -31,29 +31,28 @@ def main():
         hue='outcome',
         legend='brief',
     )
+    plt.savefig("prob_distr_fig.png")
     plt.show()
 
 
 class Circuit:
-    def __init__(self, n=1, edges=(), theta=np.pi):
+    def __init__(self, graph, theta=np.pi):
         """
-        Building IQP circuits from networks and calculating output prob distributions.
+        Build IQP circuit from networkx object and calculate output prob distributions.
         """
-        self.edges = edges          # j, k pairs of vertices for each edge in the graph
-        self.n = n                  # number of vertices / qubits
-        self.N = int(2 ** n)        # number of possible states / bitstrings
+        self._graph = graph         # networkx object defining circuit
         self._theta = theta         # IQP theta for all gates, "coupling strength"
-        self.psi = self._gen_psi()  # state before final hadamard and mmnt
 
-        self.graph = nx.Graph()     # graph of vertices & edges defining IQP circuit
-        self._update_graph()        # add edges to graph
+        self.n = len(graph)         # number of vertices / qubits
+        self.N = int(2 ** self.n)   # number of possible states / bitstrings
+        self.psi = self._gen_psi()  # state before final hadamard and mmnt
 
     def _exponent_sum(self, bitstring):
         """
         Calculate the sum for the exponent required to evolve each qubit's state.
         """
         exponent = 0
-        for j, k in self.edges:
+        for j, k in self._graph.edges:
             exponent += (-1) ** (int(bitstring[j]) + int(bitstring[k]))
         return exponent
 
@@ -64,24 +63,24 @@ class Circuit:
         psi = np.array([-1] * self.N, dtype=np.complex128)
         for i in range(self.N):
             bitstring = gen_bitstring(i, self.n)
-            psi[i] = np.e ** (1j * self._theta * self._exponent_sum(bitstring))
+            psi[i] = np.e ** (1j * self.theta * self._exponent_sum(bitstring))
         return psi
 
     def _update_graph(self):
         """
         Ensure all edges are added to the graph.
         """
-        for j, k in self.edges:
-            self.graph.add_edge(j, k)
+        for j, k in self._graph.edges:
+            self._graph.add_edge(j, k)
 
     def draw_graph(self, circular=False):
         """
         Display graph using matplotlib.
         """
         if circular:
-            nx.draw_circular(self.graph, with_labels=True, font_weight='bold')
+            nx.draw_circular(self._graph, with_labels=True, font_weight='bold')
         else:
-            nx.draw(self.graph, with_labels=True, font_weight='bold')
+            nx.draw(self._graph, with_labels=True, font_weight='bold')
         plt.show()
 
     def output_prob(self, output):
@@ -111,7 +110,7 @@ class Circuit:
         """
         outcomes = list(range(self.N))
         probabilities = []
-        thetas = [self._theta] * self.N
+        thetas = [self.theta] * self.N
 
         for i in outcomes:
             probabilities.append(self.output_prob(i))
@@ -123,12 +122,21 @@ class Circuit:
         })
         return distribution
 
-    def set_theta(self, theta):
+    @property
+    def theta(self):
+        return self._theta
+
+    @theta.setter
+    def theta(self, theta):
         """
         Update state psi when theta is changed.
         """
-        self._theta = theta
+        self.theta = theta
         self.psi = self._gen_psi()
+
+
+def circuit_from_graph(graph):
+    return Circuit(n=len(graph), edges=graph.edges)
 
 
 def gen_prob_dataframe():
