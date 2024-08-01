@@ -1,4 +1,5 @@
 from pprint import pprint
+
 from sympy import fwht
 import matplotlib.pyplot as plt
 import networkx as nx
@@ -10,13 +11,34 @@ sns.set(style="ticks")
 
 
 def main():
-    n = 3
-    edges = [[0, 1], [1, 2], [0, 2]]
-    cir = Circuit(n=n, edges=edges)
+    plot_prob_for_theta()
+
+
+def plot_prob_for_theta():
+    """
+    Create plot of prob dist
+    """
+    n = 5
+    edges = [[0, 1], [1, 2], [2, 3], [3, 4], [4, 0]]
+    graph = gen_network(n, edges)
+    cir = Circuit(graph, 1)
+    df = gen_prob_dataframe()
+    sns.barplot(x="bitstring", y="probability", data=df)
+    plt.show()
+
+
+def plot_prob_vs_theta(file_name=False):
+    """
+    Create plot of prob dist
+    """
+    n = 5
+    edges = [[0, 1], [1, 2], [2, 3], [3, 4], [4, 0]]
+    graph = gen_network(n, edges)
+    cir = Circuit(graph)
     df = gen_prob_dataframe()
 
     for theta in np.linspace(0, np.pi/2, 65):
-        cir.settheta(theta)                    # set new theta which generates new psi
+        cir.theta = theta                       # set new theta which generates new psi
         prob_distr = cir.prob_distribution()    # probability of each outcome
 
         # update dataframe
@@ -28,22 +50,26 @@ def main():
         kind='scatter',
         x='theta',
         y='probability',
-        hue='outcome',
+        hue='bitstring',
         legend='brief',
     )
-    plt.savefig("prob_distr_fig.png")
+
+    if file_name:
+        plt.savefig(file_name)
+
     plt.show()
 
 
 class Circuit:
-    def __init__(self, graph, theta=np.pi):
+    def __init__(self, network, theta=np.pi, network_label=None):
         """
         Build IQP circuit from networkx object and calculate output prob distributions.
         """
-        self._graph = graph         # networkx object defining circuit
-        self._theta = theta         # IQP theta for all gates, "coupling strength"
+        self.network = network              # networkx.Graph object defining circuit
+        self.network_label = network_label  # e.g. line, ring, complete...
+        self._theta = theta                 # IQP theta for all gates, "coupling strength"
 
-        self.n = len(graph)         # number of vertices / qubits
+        self.n = len(network)       # number of vertices / qubits
         self.N = int(2 ** self.n)   # number of possible states / bitstrings
         self.psi = self._gen_psi()  # state before final hadamard and mmnt
 
@@ -52,7 +78,7 @@ class Circuit:
         Calculate the sum for the exponent required to evolve each qubit's state.
         """
         exponent = 0
-        for j, k in self._graph.edges:
+        for j, k in self.network.edges:
             exponent += (-1) ** (int(bitstring[j]) + int(bitstring[k]))
         return exponent
 
@@ -70,17 +96,17 @@ class Circuit:
         """
         Ensure all edges are added to the graph.
         """
-        for j, k in self._graph.edges:
-            self._graph.add_edge(j, k)
+        for j, k in self.network.edges:
+            self.network.add_edge(j, k)
 
     def draw_graph(self, circular=False):
         """
         Display graph using matplotlib.
         """
         if circular:
-            nx.draw_circular(self._graph, with_labels=True, font_weight='bold')
+            nx.draw_circular(self.network, with_labels=True, font_weight='bold')
         else:
-            nx.draw(self._graph, with_labels=True, font_weight='bold')
+            nx.draw(self.network, with_labels=True, font_weight='bold')
         plt.show()
 
     def output_prob(self, output):
@@ -109,6 +135,7 @@ class Circuit:
         Return probability of each bitstring outcome.
         """
         outcomes = list(range(self.N))
+        bitstrings = [gen_bitstring(i, self.n) for i in outcomes]
         probabilities = []
         thetas = [self.theta] * self.N
 
@@ -117,13 +144,20 @@ class Circuit:
 
         distribution = pd.DataFrame({
             "outcome": outcomes,
+            "bitstring": bitstrings,
             "probability": probabilities,
             "theta": thetas,
+            "network": self.network_label,
         })
+
+        distribution["probability"] /= distribution["probability"].sum()
         return distribution
 
     @property
     def theta(self):
+        """
+        Theta is a property to ensure correct updates to instance if theta is changed.
+        """
         return self._theta
 
     @theta.setter
@@ -131,12 +165,8 @@ class Circuit:
         """
         Update state psi when theta is changed.
         """
-        self.theta = theta
+        self._theta = theta
         self.psi = self._gen_psi()
-
-
-def circuit_from_graph(graph):
-    return Circuit(n=len(graph), edges=graph.edges)
 
 
 def gen_prob_dataframe():
