@@ -1,51 +1,44 @@
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
 import seaborn as sns
 
-from circuit import Circuit, gen_prob_dataframe
+import circuit
 import graph
 
 
-def plot_prob_for_theta():
-    """
-    Create plot of prob dist
-    """
-    n = 5
-    edges = [[0, 1], [1, 2], [2, 3], [3, 4], [4, 0]]
-    ring_graph = graph.gen_network(n, edges)
-    cir = Circuit(ring_graph, 1)
-    df = gen_prob_dataframe()
-    sns.barplot(x="bitstring", y="probability", data=df)
+def main():
+    plot_prob_vs_theta(4)
     plt.show()
 
 
-def plot_prob_vs_theta(file_name=False):
+def plot_prob_vs_theta(n=3, file_name=False):
     """
     Create plot of prob dist
     """
-    n = 5
-    edges = [[0, 1], [1, 2], [2, 3], [3, 4], [4, 0]]
-    ring_graph = graph.gen_network(n, edges)
-    cir = Circuit(ring_graph)
-    df = gen_prob_dataframe()
-
+    cycle_graph = graph.gen_graph(n, graph.GraphTypes.cycle)
+    cir = circuit.Circuit(cycle_graph, 1)
+    data = cir.prob_distribution()
     for theta in np.linspace(0, np.pi/2, 65):
-        cir.theta = theta                       # set new theta which generates new psi
-        prob_distr = cir.prob_distribution()    # probability of each outcome
+        cir.theta = theta
+        prob_distr = cir.prob_distribution()
 
         # update dataframe
-        if df.empty: df = prob_distr
-        else: df = pd.concat([df, prob_distr])
+        if data.empty: data = prob_distr
+        else: data = pd.concat([data, prob_distr])
 
     sns.relplot(
-        data=df,
+        data=data,
         kind='scatter',
-        x='theta',
-        y='probability',
-        hue='bitstring',
+        x=circuit.ColumnHeaders.theta,
+        y=circuit.ColumnHeaders.probability,
+        hue=circuit.ColumnHeaders.bitstring,
         legend='brief',
     )
 
     if file_name:
         plt.savefig(file_name)
 
-    plt.show()
+
+if __name__ == '__main__':
+    main()
