@@ -2,7 +2,6 @@
 Utils for working with networkx graphs.
 """
 
-import matplotlib.pyplot as plt
 import networkx as nx
 import seaborn as sns
 
