@@ -5,6 +5,7 @@ Plot and save figures of probability distributions for IQP circuits from graphs.
 from pathlib import Path
 
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 import seaborn as sns
 
@@ -23,7 +24,8 @@ def main():
         # graph.Enum.star,
         # graph.Enum.complete,
     ]
-    plot_figure(5, graph_types, 1)
+    theta = np.pi / 4
+    plot_figure(5, graph_types, theta)
     plt.show()
 
 
