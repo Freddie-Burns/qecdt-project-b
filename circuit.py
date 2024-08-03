@@ -19,6 +19,7 @@ class ColumnHeaders:
     probability = "probability"
     theta = "theta"
     graph_type = "graph type"
+    num_qubits = "number of qubits"
 
 
 class Circuit:
@@ -109,6 +110,7 @@ class Circuit:
             ColumnHeaders.probability: probabilities,
             ColumnHeaders.theta: thetas,
             ColumnHeaders.graph_type: self.graph_type,
+            ColumnHeaders.num_qubits: self.n,
         })
 
         distribution["probability"] /= distribution["probability"].sum()
