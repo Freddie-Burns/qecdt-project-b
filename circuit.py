@@ -78,7 +78,7 @@ class Circuit:
         """
         # Convert bitstring to int value
         if type(output) is str:
-            ouput = int(output, 2)
+            output = int(output, 2)
 
         # Create vector repr bitstring
         mmnt_vector = np.zeros(self.N)
@@ -90,7 +90,7 @@ class Circuit:
 
         # Inner product of state and transformed output gives its probability
         result = np.inner(hadamard_output_complex, self.psi)
-        return np.abs(result) ** 2
+        return (np.abs(result) ** 2) / (self.N ** 2)
 
     def prob_distribution(self):
         """
