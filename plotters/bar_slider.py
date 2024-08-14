@@ -13,7 +13,7 @@ import circuit
 import graph
 from plotters import theta_textbox
 
-sns.set()
+sns.set(font_scale=1.6)
 
 
 def main():
@@ -127,7 +127,7 @@ class BarSlider:
         plt.xticks(rotation=90)
         self.ax.legend(loc="upper left")
         plt.gcf().subplots_adjust(bottom=0.25)
-        theta_textbox(theta)
+        theta_textbox(theta, fontsize=20)
         self.fig.canvas.draw_idle()
 
 

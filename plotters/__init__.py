@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-def theta_textbox(theta, ax=None):
+def theta_textbox(theta, ax=None, fontsize=14):
     """
     Display value of theta in textbox on plot in terms of pi.
     """
@@ -17,7 +17,7 @@ def theta_textbox(theta, ax=None):
         0.95, 0.95,
         label,
         transform=ax.transAxes,
-        fontsize=14,
+        fontsize=fontsize,
         verticalalignment='top',
         horizontalalignment='right',
         bbox=props,

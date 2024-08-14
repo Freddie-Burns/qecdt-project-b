@@ -36,7 +36,7 @@ CREATE_GRAPH = {
 }
 
 
-def gen_graph(n, graph_type=None, edges=None, ):
+def gen_graph(n, graph_type=None, edges=None):
     """
     Create networkx with n nodes.
     Define either by edges or graph type.
@@ -44,7 +44,7 @@ def gen_graph(n, graph_type=None, edges=None, ):
     # Create standard graph of n nodes
     if graph_type is not None:
         # Star nx.star_graph creates n+1 nodes
-        if graph_type is GraphTypes.star: n -= 1
+        if graph_type == GraphTypes.star: n -= 1
         graph = CREATE_GRAPH[graph_type](n)
 
     # Create custom graph from specified edges
