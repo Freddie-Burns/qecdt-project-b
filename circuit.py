@@ -18,8 +18,14 @@ import torch
 # sns.set(style="ticks")
 
 
-@profile
 def main():
+    network = nx.complete_graph(3)
+    cir = Circuit(network, theta=np.pi/4)
+    pass
+
+
+@profile
+def profile_function():
     had_times = []
     fwht_times = []
     torch_times = []
