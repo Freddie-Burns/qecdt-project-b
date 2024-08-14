@@ -80,7 +80,8 @@ class Circuit:
         for i in range(self.N):
             bitstring = gen_bitstring(i, self.n)
             psi[i] = np.e ** (1j * self.theta * self._exponent_sum(bitstring))
-        return psi
+        norm = np.sum(np.abs(psi) ** 2)
+        return psi / np.sqrt(norm)
 
     def _update_graph(self):
         """
