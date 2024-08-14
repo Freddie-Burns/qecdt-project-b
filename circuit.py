@@ -70,7 +70,7 @@ class Circuit:
         exponent = 0
         for j, k in self.network.edges:
             exponent += (-1) ** (int(bitstring[j]) + int(bitstring[k]))
-        return exponent
+        return -exponent
 
     def _gen_psi(self):
         """
