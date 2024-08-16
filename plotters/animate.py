@@ -16,10 +16,10 @@ def main():
     graph_types = [
         graph.GraphTypes.path,
         graph.GraphTypes.cycle,
-        graph.GraphTypes.star,
-        graph.GraphTypes.complete,
+        # graph.GraphTypes.star,
+        # graph.GraphTypes.complete,
     ]
-    animate_graph(4, graph_types)
+    animate_graph(3, graph_types)
     # plt.show()
 
 
@@ -47,7 +47,7 @@ def animate_graph(num_qubits, graph_types, thetas=None):
 
     # Default range of theta values to animate over
     if thetas is None:
-        thetas = np.linspace(0, np.pi, 90)
+        thetas = np.linspace(0, np.pi, 101)
 
     # Script to create figure, animate, and save
     fig = plt.figure()

@@ -25,8 +25,18 @@ def main():
         graph.GraphTypes.cycle,
     ]
 
+    # Add final two four node graphs
+    edges_1 = [[0, 1], [0, 2], [0, 3], [1, 2]]
+    edges_2 = [[0, 1], [0, 2], [0, 3], [1, 2], [1, 3]]
+    graph_1 = graph.gen_graph(4, edges=edges_1)
+    graph_2 = graph.gen_graph(4, edges=edges_2)
+    circuit_1 = circuit.Circuit(graph_1, 0, "4x5")
+    circuit_2 = circuit.Circuit(graph_2, 0, "4x6")
+
     # Must assign instance or slider is garbage collected!
     bar_slider = BarSlider(num_qubits, graph_types)
+    bar_slider.add_circuit(circuit_1)
+    bar_slider.add_circuit(circuit_2)
     plt.show()
 
 
@@ -54,13 +64,20 @@ class BarSlider:
         self.slider.on_changed(self.update)
         self.update(0)
 
-    def calculate(self):
+    def add_circuit(self, cir: circuit.Circuit):
+        self.circuits.append(cir)
+        data = self.calculate([cir])
+        self.data = pd.concat([self.data, data])
+
+    def calculate(self, circuits=None):
         """
         Calculate probability distributions
         """
+        if circuits is None:
+            circuits = self.circuits
         data_frames = []
         for theta in self.thetas:
-            for c in self.circuits:
+            for c in circuits:
                 c.theta = theta
                 data_frames.append(c.prob_distribution())
         return pd.concat(data_frames)

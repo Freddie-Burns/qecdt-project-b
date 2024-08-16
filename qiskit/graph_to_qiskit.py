@@ -12,9 +12,13 @@ import networkx as nx
 from numpy import pi
 from matplotlib import pyplot as plt
 
-GRAPH = nx.complete_graph(3)
-THETA = pi / 2
+GRAPH = nx.path_graph(3)
+THETA = pi
 n = len(GRAPH)
+
+# Correct theta for Qiskit definition
+# https://docs.quantum.ibm.com/api/qiskit/qiskit.circuit.library.RZGate
+THETA *= -2
 
 qreg_q = QuantumRegister(n, 'q')
 circuit = QuantumCircuit(qreg_q)
@@ -47,12 +51,11 @@ pprint(list(zip(bitstrings, probstrings)))
 total = sum(probs)
 print(f"Total prob: {total:.2f}")
 
-if False:
-    nx.draw(GRAPH, with_labels=True)
+nx.draw(GRAPH, with_labels=True)
 
-    plt.figure()
-    plt.bar(bitstrings, probs)
-    plt.xticks(rotation=90)
+plt.figure()
+plt.bar(bitstrings, probs)
+plt.xticks(rotation=90)
 
-    circuit.draw(output='mpl')
-    plt.show()
+circuit.draw(output='mpl')
+plt.show()
